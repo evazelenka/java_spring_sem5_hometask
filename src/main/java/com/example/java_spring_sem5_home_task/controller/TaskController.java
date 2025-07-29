@@ -4,22 +4,21 @@ import com.example.java_spring_sem5_home_task.domain.Task;
 import com.example.java_spring_sem5_home_task.enums.TaskStatus;
 import com.example.java_spring_sem5_home_task.services.TaskService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
+@AllArgsConstructor
 public class TaskController {
 
 
     private TaskService taskService;
-
-    public TaskController(TaskService taskService) {
-        this.taskService = taskService;
-    }
 
     @GetMapping
     public List<Task> getAllTasks(){
@@ -28,11 +27,12 @@ public class TaskController {
 
     @PostMapping
     public Task addTask(@RequestBody Task task){
+        task.setDate_of_create(LocalDateTime.now());
         return taskService.addTask(task);
     }
 
     @GetMapping("/status/{status}")
-    public List<Task> getTasksByStatus(@PathVariable String status){
+    public List<Task> getTasksByStatus(@PathVariable TaskStatus status){
         return taskService.getTasksByStatus(status);
     }
 
@@ -41,9 +41,12 @@ public class TaskController {
         return Arrays.stream(TaskStatus.values()).toList();
     }
 
-    @PostMapping("/status/{id}/{status}")
-    public void changeStatus(@PathVariable String status, @PathVariable int id){
-        taskService.setStatus(id, status);
+    @PostMapping("/status/{id}")
+    public void changeStatus(@RequestBody Task task, @PathVariable long id){
+        Task findTask = taskService.findById(id);
+        if (findTask != null){
+            taskService.setStatus(id, task.getStatus());
+        }
     }
 
     @DeleteMapping("/{id}")

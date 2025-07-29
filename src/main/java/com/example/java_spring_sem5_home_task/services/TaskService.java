@@ -25,7 +25,9 @@ public class TaskService {
      * @return - добавленная задача.
      */
     public Task addTask(Task task){
-        checkStatus(task.getStatus());
+        if (task.getStatus() != null){
+            task.setStatus(makeStatusCorrect(task.getStatus()));
+        }
         return repository.save(task);
     }
 
@@ -42,24 +44,25 @@ public class TaskService {
      * @param status статус задачи.
      * @return - список задач.
      */
-    public List<Task> getTasksByStatus(String status){
+    public List<Task> getTasksByStatus(TaskStatus status){
         return repository.findByStatus(makeStatusCorrect(status));
     }
 
 
     /**
      * Метод для проверки статуса на корректностью
-     * @param status статус задачи добавленный пользователем.
+     * @param s статус задачи добавленный пользователем.
      * @return - отформатированный статус, либо измененный, если был передан неизвестный статус.
      */
-    private String makeStatusCorrect(String status){
-        String s = status.toUpperCase();
-        if (status.equals(TaskStatus.IN_PROCESS.status)){
-            return TaskStatus.IN_PROCESS.status;
-        } else if (status.equals(TaskStatus.DONE.status)) {
-            return TaskStatus.DONE.status;
+    private TaskStatus makeStatusCorrect(TaskStatus s){
+        if (s != null) {
+            if (s.equals(TaskStatus.IN_PROCESS)) {
+                return TaskStatus.IN_PROCESS;
+            } else if (s.equals(TaskStatus.DONE)) {
+                return TaskStatus.DONE;
+            }
         }
-        return TaskStatus.NOT_STARTED.status;
+        return TaskStatus.NOT_STARTED;
     }
 
     /**
@@ -68,21 +71,12 @@ public class TaskService {
      * @param id  идентификатор задачи.
      */
     @Transactional
-    public void setStatus(int id, String status){
-        if(checkStatus(status)){
-            repository.updateStatus(id, makeStatusCorrect(status));
-        }
+    public void setStatus(long id, TaskStatus status){
+        repository.updateStatus(id, makeStatusCorrect(status));
     }
 
-    /**
-     * Метод проверки статуса, полученного от пользователя.
-     * @param status статус.
-     * @return возвращает true, если пользователь ввел корректный статус.
-     */
-    private boolean checkStatus(String status) {
-        String str = status.toUpperCase();
-        TaskStatus st = Arrays.stream(TaskStatus.values()).toList().stream().filter(s -> s.status.equals(str)).findFirst().orElse(null);
-        return st != null;
+    public Task findById(Long id){
+        return repository.findById(id).orElse(null);
     }
 
     /**

@@ -3,20 +3,17 @@ package com.example.java_spring_sem5_home_task.controller;
 import com.example.java_spring_sem5_home_task.domain.Task;
 import com.example.java_spring_sem5_home_task.enums.TaskStatus;
 import com.example.java_spring_sem5_home_task.services.TaskService;
-
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
 @AllArgsConstructor
+@Log
 public class TaskController {
-
 
     private TaskService taskService;
 
@@ -27,7 +24,7 @@ public class TaskController {
 
     @PostMapping
     public Task addTask(@RequestBody Task task){
-        task.setDate_of_create(LocalDateTime.now());
+        log.info("add new task");
         return taskService.addTask(task);
     }
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,8 +26,9 @@ public class TaskService {
      * @return - добавленная задача.
      */
     public Task addTask(Task task){
-        if (task.getStatus() != null){
-            task.setStatus(makeStatusCorrect(task.getStatus()));
+        task.setDate_of_create(LocalDateTime.now());
+        if (task.getStatus() == null){
+            task.setStatus(TaskStatus.NOT_STARTED);
         }
         return repository.save(task);
     }
@@ -45,24 +47,7 @@ public class TaskService {
      * @return - список задач.
      */
     public List<Task> getTasksByStatus(TaskStatus status){
-        return repository.findByStatus(makeStatusCorrect(status));
-    }
-
-
-    /**
-     * Метод для проверки статуса на корректностью
-     * @param s статус задачи добавленный пользователем.
-     * @return - отформатированный статус, либо измененный, если был передан неизвестный статус.
-     */
-    private TaskStatus makeStatusCorrect(TaskStatus s){
-        if (s != null) {
-            if (s.equals(TaskStatus.IN_PROCESS)) {
-                return TaskStatus.IN_PROCESS;
-            } else if (s.equals(TaskStatus.DONE)) {
-                return TaskStatus.DONE;
-            }
-        }
-        return TaskStatus.NOT_STARTED;
+        return repository.findByStatus(status);
     }
 
     /**
@@ -72,7 +57,7 @@ public class TaskService {
      */
     @Transactional
     public void setStatus(long id, TaskStatus status){
-        repository.updateStatus(id, makeStatusCorrect(status));
+        repository.updateStatus(id, status);
     }
 
     public Task findById(Long id){
